@@ -148,7 +148,7 @@ class PureEnergyCoordinator(DataUpdateCoordinator[PureEnergieData]):
         solar = entry.data.get(CONF_SOLAR_PANELS, DEFAULT_SOLAR_PANELS)
 
         url = (
-            f"{base_url}/current"
+            f"{base_url}"
             f"?double_meter={'true' if double_meter else 'false'}"
             f"&solar_panels={'true' if solar else 'false'}"
             f"&commodity={commodity}"
