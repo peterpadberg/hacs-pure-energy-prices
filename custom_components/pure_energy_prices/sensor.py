@@ -27,7 +27,7 @@ class PureEnergiePriceSensor(SensorEntity):
     """Sensor entity for displaying pure energy prices."""
 
     _attr_has_entity_name = True
-    _attr_name = None
+    _attr_name = "Current Price"
 
     def __init__(
         self,
@@ -96,6 +96,7 @@ class PureEnergiePercentileSensor(SensorEntity):
         self._commodity = commodity
         self._direction = direction
         self._percentile = percentile
+        self._attr_name = "Percentile Price (" + str(int(self._percentile * 100)) + ")"
         self._attr_unique_id = (
             f"{config_entry.entry_id}_{commodity}_{direction}_percentile_{int(percentile * 100)}"
         )
