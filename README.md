@@ -44,7 +44,6 @@ After setup, access options via the config entry options panel:
 | `redelivery` | bool | False | Enable redelivery sensors |
 | `double_meter` | bool | True | Use double meter reading |
 | `gas_element_id` | string | `gas_element_id` | Gas element identifier |
-| `horizon_hours` | int | 48 | Forecast horizon in hours |
 | `return_costs` | float | 0.0 | Return costs for export |
 | `scan_interval` | int | 3600 | Update interval in seconds |
 | `solar_panels` | bool | False | Enable solar panel sensors |

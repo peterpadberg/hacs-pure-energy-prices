@@ -20,7 +20,6 @@ from custom_components.pure_energy_prices.const import (
     CONF_COMMODITY_GAS,
     CONF_DOUBLE_METER,
     CONF_GAS_ELEMENT_ID,
-    CONF_HORIZON_HOURS,
     CONF_RETURN_COSTS,
     CONF_SCAN_INTERVAL,
     CONF_SOLAR_PANELS,
@@ -29,7 +28,6 @@ from custom_components.pure_energy_prices.const import (
     DEFAULT_BUSINESS,
     DEFAULT_DOUBLE_METER,
     DEFAULT_GAS_ELEMENT_ID,
-    DEFAULT_HORIZON_HOURS,
     DEFAULT_RETURN_COSTS,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SOLAR_PANELS,
@@ -199,19 +197,14 @@ class PureEnergyCoordinator(DataUpdateCoordinator[PureEnergieData]):
 
     async def _async_update_data(self) -> PureEnergieData:
         """Fetch the latest data from the Pure Energie API."""
-        horizon_hours = int(
-            self._entry.data.get(CONF_HORIZON_HOURS, DEFAULT_HORIZON_HOURS)
-        )
-
         try:
             now_dt = datetime.now(tz=timezone.utc)
             prices = await self._fetch_prices(now_dt)
 
-            # If horizon is 48h, fetch next day's prices too
-            if horizon_hours == 48:
-                next_dt = now_dt + timedelta(hours=24)
-                more_prices = await self._fetch_prices(next_dt)
-                prices.extend(more_prices)
+            # Fetch next day's prices too (48h horizon is always enabled)
+            next_dt = now_dt + timedelta(hours=24)
+            more_prices = await self._fetch_prices(next_dt)
+            prices.extend(more_prices)
 
             _LOGGER.debug(
                 "Fetched %d prices for %s/%s",

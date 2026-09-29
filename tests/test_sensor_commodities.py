@@ -8,7 +8,6 @@ from custom_components.pure_energy_prices.const import (
     CONF_COMMODITY_GAS,
     CONF_SOLAR_PANELS,
     DEFAULT_SCAN_INTERVAL,
-    DEFAULT_HORIZON_HOURS,
     UNIT_KWH,
     UNIT_M3,
 )

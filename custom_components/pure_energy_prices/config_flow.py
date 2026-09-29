@@ -18,14 +18,12 @@ from custom_components.pure_energy_prices.const import (
     CONF_COMMODITY_GAS,
     CONF_DOUBLE_METER,
     CONF_GAS_ELEMENT_ID,
-    CONF_HORIZON_HOURS,
     CONF_RETURN_COSTS,
     CONF_SCAN_INTERVAL,
     CONF_SOLAR_PANELS,
     DEFAULT_ADDED_COSTS,
     DEFAULT_DOUBLE_METER,
     DEFAULT_GAS_ELEMENT_ID,
-    DEFAULT_HORIZON_HOURS,
     DEFAULT_RETURN_COSTS,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SOLAR_PANELS,
@@ -68,10 +66,6 @@ class PureEnergieConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_COMMODITY_GAS,
                     default=defaults.get(CONF_COMMODITY_GAS, False),
                 ): cv.boolean,
-                vol.Required(
-                    CONF_HORIZON_HOURS,
-                    default=defaults.get(CONF_HORIZON_HOURS, DEFAULT_HORIZON_HOURS),
-                ): vol.All(vol.Coerce(int), vol.Range(min=1, max=168)),
                 vol.Required(
                     CONF_GAS_ELEMENT_ID,
                     default=defaults.get(CONF_GAS_ELEMENT_ID, DEFAULT_GAS_ELEMENT_ID),
@@ -134,10 +128,6 @@ class PureEnergieOptionsFlow(config_entries.OptionsFlow):
                     CONF_COMMODITY_GAS,
                     default=defaults.get(CONF_COMMODITY_GAS, False),
                 ): cv.boolean,
-                vol.Required(
-                    CONF_HORIZON_HOURS,
-                    default=defaults.get(CONF_HORIZON_HOURS, DEFAULT_HORIZON_HOURS),
-                ): vol.All(vol.Coerce(int), vol.Range(min=1, max=168)),
                 vol.Required(
                     CONF_GAS_ELEMENT_ID,
                     default=defaults.get(CONF_GAS_ELEMENT_ID, DEFAULT_GAS_ELEMENT_ID),
