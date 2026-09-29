@@ -19,7 +19,7 @@ CONF_PERCENTILES = "percentiles"
 CONF_SOLAR_PANELS = "solar_panels"
 
 # --- Default values ---
-DEFAULT_BASE_URL = "https://api.pure-energie.com/energy-prices"
+DEFAULT_BASE_URL = "https://pure-energie.nl/api/prices-element/dynamic"
 DEFAULT_ELEMENT_ID = 11480
 DEFAULT_GAS_ELEMENT_ID = 11481
 DEFAULT_HORIZON_HOURS = 48
