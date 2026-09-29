@@ -121,7 +121,7 @@ class PureEnergyCoordinator(DataUpdateCoordinator[PureEnergieData]):
         entry = self._entry
         element_id = self._element_id
 
-        base_url = entry.data.get(CONF_BASE_URL, DEFAULT_BASE_URL)
+        base_url = entry.data.get(CONF_BASE_URL, DEFAULT_BASE_URL) or DEFAULT_BASE_URL
 
         # Determine which commodity to fetch
         commodity = self._commodity
@@ -148,7 +148,7 @@ class PureEnergyCoordinator(DataUpdateCoordinator[PureEnergieData]):
         solar = entry.data.get(CONF_SOLAR_PANELS, DEFAULT_SOLAR_PANELS)
 
         url = (
-            f"{base_url}"
+            f"{base_url}/current"
             f"?double_meter={'true' if double_meter else 'false'}"
             f"&solar_panels={'true' if solar else 'false'}"
             f"&commodity={commodity}"
