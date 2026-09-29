@@ -58,8 +58,8 @@ def test_sensor_creation(percentile_sensor):
 
 def test_unit_of_measurement(percentile_sensor, mock_entry):
     """Test unit of measurement property."""
-    # Default is kWh since __init__ doesn't read from entry.data
-    assert percentile_sensor.native_unit_of_measurement == "kWh"
+    # Default unit is UNIT_EUR_KWH
+    assert percentile_sensor.native_unit_of_measurement == "\u20ac/kWh"
 
 
 def test_state_class(percentile_sensor):

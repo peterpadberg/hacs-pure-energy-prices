@@ -18,6 +18,8 @@ from custom_components.pure_energy_prices.const import (
     CONF_SOLAR_PANELS,
     DEFAULT_PERCENTILES,
     DOMAIN,
+    UNIT_EUR_KWH,
+    UNIT_EUR_M3,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -35,7 +37,7 @@ class PureEnergiePriceSensor(SensorEntity):
         config_entry: ConfigEntry,
         commodity: str = "electricity",
         direction: str = "import",
-        unit_of_measurement: str = "kWh",
+        unit_of_measurement: str = UNIT_EUR_KWH,
     ) -> None:
         """Initialize the sensor."""
         self._attr_device_info = {
@@ -87,7 +89,7 @@ class PureEnergiePercentileSensor(SensorEntity):
         config_entry: ConfigEntry,
         commodity: str = "electricity",
         direction: str = "import",
-        unit_of_measurement: str = "kWh",
+        unit_of_measurement: str = UNIT_EUR_KWH,
         percentile: float = 0.1,
     ) -> None:
         """Initialize the sensor."""
@@ -172,7 +174,7 @@ async def async_setup_entry(
                 config_entry,
                 "electricity",
                 "import",
-                "kWh",
+                UNIT_EUR_KWH,
             )
         )
         # Add percentile sensors for electricity import
@@ -183,7 +185,7 @@ async def async_setup_entry(
                     config_entry,
                     "electricity",
                     "import",
-                    "kWh",
+                    UNIT_EUR_KWH,
                     percentile,
                 )
             )
@@ -196,7 +198,7 @@ async def async_setup_entry(
                     config_entry,
                     "electricity",
                     "export",
-                    "kWh",
+                    UNIT_EUR_KWH,
                 )
             )
             # Add percentile sensors for electricity export
@@ -207,7 +209,7 @@ async def async_setup_entry(
                         config_entry,
                         "electricity",
                         "export",
-                        "kWh",
+                        UNIT_EUR_KWH,
                         percentile,
                     )
                 )

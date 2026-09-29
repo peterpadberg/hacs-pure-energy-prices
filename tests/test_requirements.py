@@ -5,7 +5,7 @@ import os
 
 def test_ha_version_pin_not_downgraded():
     """Requirements.txt should not pin homeassistant to an older version than main."""
-    repo_root = os.environ.get("GITHUB_WORKSPACE", os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    repo_root = os.environ.get("GITHUB_WORKSPACE", ".")
 
     result = subprocess.run(
         ["git", "show", "main:requirements.txt"],
