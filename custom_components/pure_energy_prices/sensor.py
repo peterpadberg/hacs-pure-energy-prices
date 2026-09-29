@@ -116,7 +116,7 @@ class PureEnergiePercentileSensor(SensorEntity):
         if not isinstance(data, list) or len(data) == 0:
             return None
 
-        prices = [record.get("price", 0.0) for record in data if "price" in record]
+        prices = sorted([record.get("price", 0.0) for record in data if "price" in record])
         if not prices:
             return None
 
