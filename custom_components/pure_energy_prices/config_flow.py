@@ -38,6 +38,61 @@ class PureEnergieConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 2
 
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle re-configuration of an existing entry."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            return self.async_create_entry(
+                title="Pure Energie",
+                data=user_input,
+            )
+
+        defaults: dict[str, Any] = {}
+
+        schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_COMMODITY_ELECTRICITY,
+                    default=defaults.get(CONF_COMMODITY_ELECTRICITY, True),
+                ): cv.boolean,
+                vol.Required(
+                    CONF_SOLAR_PANELS,
+                    default=defaults.get(CONF_SOLAR_PANELS, DEFAULT_SOLAR_PANELS),
+                ): cv.boolean,
+                vol.Required(
+                    CONF_COMMODITY_GAS,
+                    default=defaults.get(CONF_COMMODITY_GAS, False),
+                ): cv.boolean,
+                vol.Required(
+                    CONF_GAS_ELEMENT_ID,
+                    default=defaults.get(CONF_GAS_ELEMENT_ID, DEFAULT_GAS_ELEMENT_ID),
+                ): vol.Coerce(int),
+                vol.Required(
+                    CONF_ADDED_COSTS,
+                    default=defaults.get(CONF_ADDED_COSTS, DEFAULT_ADDED_COSTS),
+                ): vol.Coerce(float),
+                vol.Required(
+                    CONF_RETURN_COSTS,
+                    default=defaults.get(CONF_RETURN_COSTS, DEFAULT_RETURN_COSTS),
+                ): vol.Coerce(float),
+                vol.Required(
+                    CONF_SCAN_INTERVAL,
+                    default=defaults.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
+                ): vol.All(vol.Coerce(int), vol.Range(min=60, max=86400)),
+                vol.Required(
+                    CONF_DOUBLE_METER,
+                    default=defaults.get(CONF_DOUBLE_METER, DEFAULT_DOUBLE_METER),
+                ): cv.boolean,
+            },
+        )
+
+        return self.async_show_form(
+            step_id="reconfigure", data_schema=schema, errors=errors
+        )
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
