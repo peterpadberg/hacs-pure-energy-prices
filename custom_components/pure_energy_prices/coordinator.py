@@ -30,6 +30,7 @@ from custom_components.pure_energy_prices.const import (
     DEFAULT_DOUBLE_METER,
     DEFAULT_GAS_ELEMENT_ID,
     DEFAULT_HORIZON_HOURS,
+    DEFAULT_RETURN_COSTS,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SOLAR_PANELS,
     DOMAIN,
@@ -84,6 +85,32 @@ class PureEnergyCoordinator(DataUpdateCoordinator[PureEnergieData]):
     def commodity(self) -> str | None:
         """Return the commodity."""
         return self._commodity
+
+    def _apply_cost_adjustments(self, prices: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Apply direction-based cost adjustments to prices."""
+        entry = self._entry
+        added_costs = float(
+            entry.data.get(CONF_ADDED_COSTS, DEFAULT_ADDED_COSTS)
+        )
+        return_costs = float(
+            entry.data.get(CONF_RETURN_COSTS, DEFAULT_RETURN_COSTS)
+        )
+
+        for record in prices:
+            if self._direction == "import":
+                # Import: prices include added costs
+                if added_costs > 0:
+                    record["price"] = (
+                        record.get("price", 0.0) + added_costs
+                    )
+            elif self._direction == "export":
+                # Export: subtract return costs only
+                if return_costs > 0:
+                    record["price"] = (
+                        record.get("price", 0.0) - return_costs
+                    )
+
+        return prices
 
     def _build_current_param(self, current_dt: datetime) -> str:
         """Build the 'current' URL parameter in required format: Y-m-d H:M."""
@@ -167,29 +194,8 @@ class PureEnergyCoordinator(DataUpdateCoordinator[PureEnergieData]):
             _LOGGER.warning("Expected list of price objects but got %s", type(prices))
             return []
 
-        # Apply direction-based cost filtering
-        added_costs = float(
-            entry.data.get(CONF_ADDED_COSTS, DEFAULT_ADDED_COSTS)
-        )
-        return_costs = float(
-            entry.data.get(CONF_RETURN_COSTS, DEFAULT_ADDED_COSTS)
-        )
-
-        for record in prices:
-            if self._direction == "import":
-                # Import: prices include added costs
-                if added_costs > 0:
-                    record["price"] = (
-                        record.get("price", 0.0) + added_costs
-                    )
-            elif self._direction == "export":
-                # Export: subtract return costs only
-                if return_costs > 0:
-                    record["price"] = (
-                        record.get("price", 0.0) - return_costs
-                    )
-
-        return prices
+        # Apply direction-based cost adjustments
+        return self._apply_cost_adjustments(prices)
 
     async def _async_update_data(self) -> PureEnergieData:
         """Fetch the latest data from the Pure Energie API."""

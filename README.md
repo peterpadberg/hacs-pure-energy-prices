@@ -1,74 +1,90 @@
 # Pure Energie Prices
 
-Custom Home Assistant integration for fetching dynamic electricity prices from Pure Energie energy company.
+Home Assistant integration for Pure Energie dynamic electricity and gas prices.
 
 ## Features
 
-- Fetches real-time and forecasted electricity prices from Pure Energie API (up to 48 hours)
-- Supports double meter configurations for homes with solar panels
-- Calculates percentile-based pricing (e.g., 5th, 10th, 20th percentiles)
-- Handles added costs and return costs for total price calculation
-- Resilient API handling with graceful fallback on failures
-- Configurable scan interval and horizon hours
-
-## Installation
-
-1. Clone this repository into your Home Assistant `custom_components` directory
-2. Restart Home Assistant
-3. Go to Settings → Devices & Services → Add Integration
-4. Search for "Pure Energie Prices" and configure with your credentials
+- **Multi-commodity support**: Electricity, gas, and redelivery
+- **Per-entry multi-sensor**: Each config entry can create multiple sensor entities (import/export)
+- **Percentile sensors**: Pre-calculated percentile prices from forecasted data
+- **Price direction awareness**: Import adds costs, export subtracts return costs
+- **Reconfiguration support**: Update options without reinstalling
 
 ## Configuration
 
-The integration supports the following configuration options via the Home Assistant UI:
+### Setup
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| Element ID | Pure Energie element identifier | Default value |
-| Double Meter | Enable for double meter setups | True |
-| Solar Panels | Enable solar panel support | True |
-| Horizon Hours | Forecast horizon (24 or 48) | 24 |
-| Business | Business customer flag | False |
-| Commodities | Type (electricity, gas, redelivery) | electricity |
-| Percentiles | Comma-separated percentile values | 0.05, 0.1, 0.2, 0.4 |
-| Unit of Measurement | Price unit | €/kWh |
-| Scan Interval | Update interval in seconds | 3600 |
-| Added Costs | Additional costs to add | 0.0 |
-| Return Costs | Costs to subtract | 0.0 |
+Add the integration through the Home Assistant UI. On first setup you configure:
 
-## Usage
+- **API key**: Your Pure Energie API credentials
+- **Double meter**: Enable split meter reading
+- **Solar panels**: Enable solar panel integration
 
-The integration creates the following sensor entities:
+### Options
 
-### Pure Energy Price
-- **Unique ID**: `{config_entry.entry_id}_price`
-- **Name**: Pure Energy Price
-- **Unit**: €/kWh (configurable)
-- **State Class**: MEASUREMENT
-- **Description**: Displays the current electricity price
+After setup, access options via the config entry options panel:
 
-### Pure Energy Percentile Sensors
-- **Unique ID**: `{config_entry.entry_id}_percentile_{value}`
-- **Name**: Pure Energy {percentile}% Percentile ({percentile}%)
-- **Unit**: €/kWh (configurable)
-- **State Class**: MEASUREMENT
-- **Description**: Displays the calculated percentile price based on forecasted data
+- **Horizon hours**: Forecast window (1-168 hours, default: 48)
+- **Scan interval**: Update frequency in seconds (60-86400, default: 3600)
+- **Added costs**: Costs to add to import prices
+- **Return costs**: Costs to subtract from export prices
+- **Solar panels toggle**: Enable/disable solar panel sensors
+- **Percentile sensors**: Configure which percentile prices to display
+
+### Configuration Keys
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `base_url` | string | `https://api.pure-energie.com/energy-prices` | API base URL |
+| `element_id` | int | 11480 | Main element identifier |
+| `added_costs` | float | 0.0 | Additional costs for import |
+| `business` | bool | False | Business mode flag |
+| `electricity` | bool | True | Enable electricity sensors |
+| `gas` | bool | False | Enable gas sensors |
+| `redelivery` | bool | False | Enable redelivery sensors |
+| `double_meter` | bool | True | Use double meter reading |
+| `gas_element_id` | string | `gas_element_id` | Gas element identifier |
+| `horizon_hours` | int | 48 | Forecast horizon in hours |
+| `return_costs` | float | 0.0 | Return costs for export |
+| `scan_interval` | int | 3600 | Update interval in seconds |
+| `solar_panels` | bool | False | Enable solar panel sensors |
+| `percentiles` | string | `0.05,0.1,0.2,0.4` | Percentile thresholds |
+
+## Entities
+
+### Electricity Sensors
+
+Each config entry creates:
+
+- **Electricity Import**: Current import price sensor
+- **Electricity Export**: Export price sensor (when solar panels enabled)
+- **Percentile Sensors**: Multiple percentile price sensors per direction
+
+### Sensor Properties
+
+| Property | Description |
+|----------|-------------|
+| Unique ID | `{config_entry.entry_id}_{commodity}_{direction}` |
+| Name | `Pure Energie {Commodity}` |
+| Unit | `€/kWh` (electricity), `€/m³` (gas) |
+| State Class | `MEASUREMENT` |
 
 ## API Interaction
 
-The integration fetches prices from the Pure Energie API using the following parameters:
-- `double_meter`: true/false based on configuration
-- `solar_panels`: true/false based on configuration
+The integration fetches prices from the Pure Energie API using:
+
+- `double_meter`: true/false
+- `solar_panels`: true/false
 - `commodity`: electricity, gas, or redelivery
 - `current`: Current timestamp
-- `business`: true/false based on configuration
+- `business`: true/false
 - `element_id`: Element identifier
 
 ## Error Handling
 
-- Empty API responses are handled gracefully
+- Empty API responses handled gracefully
 - JSON parse failures check for HTML-wrapped responses
-- API errors are logged and integration continues with stale data
+- API errors logged; integration continues with stale data
 - Setup continues even if initial API call fails
 
 ## Testing
@@ -77,21 +93,26 @@ The integration fetches prices from the Pure Energie API using the following par
 # Install dependencies
 pip install -r requirements.txt
 
-# Run tests
-pytest
+# Run all tests
+pytest tests/ -v
+
+# Run specific test file
+pytest tests/test_percentiles_constant.py -v
 ```
 
-The test suite covers:
+Test coverage includes:
 - Sensor creation and configuration
 - Unit of measurement properties
 - State class validation
-- Native value calculation with data
-- Native value handling with empty data
-- Coordinator update methods
+- Percentile constant usage
+- Price adjustment by direction (import adds costs, export subtracts)
+- Configuration defaults
+- Version pin correctness
 
 ## Development
 
 ### Project Structure
+
 ```
 pure-energie-prices/
 ├── custom_components/
@@ -106,18 +127,18 @@ pure-energie-prices/
 ├── docs                         # Documentation
 ├── tests/
 │   ├── conftest.py              # Test fixtures
-│   └── test_percentile_sensor.py
+│   └── test_*.py                # Test files
 ├── hacs.json                    # HACS configuration
 ├── pytest.ini                   # Pytest configuration
 └── requirements.txt             # Dependencies
 ```
 
 ### Dependencies
-Key dependencies include:
-- aiohttp==3.13.3
-- voluptuous==0.15.2
-- homeassistant==2026.2.3
-- astral==2.2
+
+- aiohttp
+- voluptuous
+- homeassistant
+- astral
 
 ## License
 

@@ -26,6 +26,7 @@ from custom_components.pure_energy_prices.const import (
     DEFAULT_DOUBLE_METER,
     DEFAULT_GAS_ELEMENT_ID,
     DEFAULT_HORIZON_HOURS,
+    DEFAULT_RETURN_COSTS,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SOLAR_PANELS,
     DOMAIN,
@@ -81,7 +82,7 @@ class PureEnergieConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ): vol.Coerce(float),
                 vol.Required(
                     CONF_RETURN_COSTS,
-                    default=defaults.get(CONF_RETURN_COSTS, DEFAULT_ADDED_COSTS),
+                    default=defaults.get(CONF_RETURN_COSTS, DEFAULT_RETURN_COSTS),
                 ): vol.Coerce(float),
                 vol.Required(
                     CONF_SCAN_INTERVAL,
@@ -115,13 +116,7 @@ class PureEnergieOptionsFlow(config_entries.OptionsFlow):
 
         if user_input is not None:
             updated_data = {**self.config_entry.data, **user_input}
-            self.hass.config_entries.async_update_entry(
-                self.config_entry, data=updated_data
-            )
-            return self.async_create_entry(
-                title="Pure Energie",
-                data=user_input,
-            )
+            return self.async_update_entry(data=updated_data)
 
         defaults: dict[str, Any] = dict(self.config_entry.data)
 
@@ -153,7 +148,7 @@ class PureEnergieOptionsFlow(config_entries.OptionsFlow):
                 ): vol.Coerce(float),
                 vol.Required(
                     CONF_RETURN_COSTS,
-                    default=defaults.get(CONF_RETURN_COSTS, DEFAULT_ADDED_COSTS),
+                    default=defaults.get(CONF_RETURN_COSTS, DEFAULT_RETURN_COSTS),
                 ): vol.Coerce(float),
                 vol.Required(
                     CONF_SCAN_INTERVAL,

@@ -82,8 +82,13 @@ def mock_coordinator():
 
 @pytest.fixture
 def mock_hass(mock_config_entry, mock_coordinator):
-    """Create a mock Home Assistant instance."""
+    """Create a mock Home Assistant instance with all coordinator keys."""
     from custom_components.pure_energy_prices.const import DOMAIN
+    
+    export_coord = MagicMock()
+    export_coord.data = mock_coordinator.data
+    gas_coord = MagicMock()
+    gas_coord.data = mock_coordinator.data
     
     hass = MagicMock()
     hass.data = {}
@@ -100,6 +105,62 @@ def mock_hass(mock_config_entry, mock_coordinator):
     
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][mock_config_entry.entry_id] = {
-        "electricity_import": mock_coordinator
+        "electricity_import": mock_coordinator,
+        "electricity_export": export_coord,
+        "gas_import": gas_coord,
     }
     return hass
+
+
+@pytest.fixture
+def entry_with_electricity():
+    """Entry with electricity only."""
+    entry = MagicMock()
+    entry.entry_id = "test_entry_id"
+    entry.data = {
+        "electricity": True,
+        "gas": False,
+        "solar_panels": False,
+    }
+    return entry
+
+
+@pytest.fixture
+def entry_with_solar():
+    """Entry with electricity + solar."""
+    entry = MagicMock()
+    entry.entry_id = "test_entry_id"
+    entry.data = {
+        "electricity": True,
+        "gas": False,
+        "solar_panels": True,
+        "percentiles": "0.05,0.1,0.2,0.4",
+    }
+    return entry
+
+
+@pytest.fixture
+def entry_with_gas():
+    """Entry with gas enabled."""
+    entry = MagicMock()
+    entry.entry_id = "test_entry_id"
+    entry.data = {
+        "electricity": True,
+        "gas": True,
+        "solar_panels": False,
+        "percentiles": "0.05,0.1,0.2,0.4",
+    }
+    return entry
+
+
+@pytest.fixture
+def entry_no_percentiles():
+    """Entry with no percentiles."""
+    entry = MagicMock()
+    entry.entry_id = "test_entry_id"
+    entry.data = {
+        "electricity": True,
+        "gas": False,
+        "solar_panels": False,
+    }
+    return entry

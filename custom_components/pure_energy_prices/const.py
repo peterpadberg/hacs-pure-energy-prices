@@ -15,6 +15,7 @@ CONF_GAS_ELEMENT_ID = "gas_element_id"
 CONF_HORIZON_HOURS = "horizon_hours"
 CONF_RETURN_COSTS = "return_costs"
 CONF_SCAN_INTERVAL = "scan_interval"
+CONF_PERCENTILES = "percentiles"
 CONF_SOLAR_PANELS = "solar_panels"
 
 # --- Default values ---

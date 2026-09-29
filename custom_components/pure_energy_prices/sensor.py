@@ -14,6 +14,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from custom_components.pure_energy_prices.const import (
     CONF_COMMODITY_ELECTRICITY,
     CONF_COMMODITY_GAS,
+    CONF_PERCENTILES,
     CONF_SOLAR_PANELS,
     DEFAULT_PERCENTILES,
     DOMAIN,
@@ -32,9 +33,9 @@ class PureEnergiePriceSensor(SensorEntity):
         self,
         coordinator: DataUpdateCoordinator,
         config_entry: ConfigEntry,
-        commodity: str,
-        direction: str,
-        unit_of_measurement: str,
+        commodity: str = "electricity",
+        direction: str = "import",
+        unit_of_measurement: str = "kWh",
     ) -> None:
         """Initialize the sensor."""
         self._attr_device_info = {
@@ -65,7 +66,7 @@ class PureEnergiePriceSensor(SensorEntity):
     @property
     def state_class(self) -> SensorStateClass:
         """Return the state class of the sensor."""
-        return SensorStateClass.TOTAL
+        return SensorStateClass.MEASUREMENT
 
 
 class PureEnergiePercentileSensor(SensorEntity):
@@ -78,10 +79,10 @@ class PureEnergiePercentileSensor(SensorEntity):
         self,
         coordinator: DataUpdateCoordinator,
         config_entry: ConfigEntry,
-        commodity: str,
-        direction: str,
-        unit_of_measurement: str,
-        percentile: float,
+        commodity: str = "electricity",
+        direction: str = "import",
+        unit_of_measurement: str = "kWh",
+        percentile: float = 0.1,
     ) -> None:
         """Initialize the sensor."""
         self._attr_device_info = {
@@ -128,7 +129,7 @@ class PureEnergiePercentileSensor(SensorEntity):
     @property
     def state_class(self) -> SensorStateClass:
         """Return the state class of the sensor."""
-        return SensorStateClass.TOTAL
+        return SensorStateClass.MEASUREMENT
 
 
 async def async_setup_entry(
@@ -145,7 +146,7 @@ async def async_setup_entry(
     has_gas = config_entry.data.get(CONF_COMMODITY_GAS, False)
 
     # Parse percentiles
-    percentiles_raw = config_entry.data.get("percentiles", DEFAULT_PERCENTILES)
+    percentiles_raw = config_entry.data.get(CONF_PERCENTILES, DEFAULT_PERCENTILES)
 
     if isinstance(percentiles_raw, str):
         percentiles = [float(p.strip()) for p in percentiles_raw.split(",")]

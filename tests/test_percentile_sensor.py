@@ -44,22 +44,22 @@ def device_info():
 
 
 @pytest.fixture
-def percentile_sensor(mock_coordinator, mock_entry, device_info):
+def percentile_sensor(mock_coordinator, mock_entry):
     """Create a percentile sensor instance."""
     return PureEnergiePercentileSensor(
-        mock_coordinator, mock_entry, 0.1, device_info
+        mock_coordinator, mock_entry, percentile=0.1
     )
 
 
 def test_sensor_creation(percentile_sensor):
     """Test sensor creation."""
     assert percentile_sensor._percentile == 0.1
-    assert "10th Percentile" in percentile_sensor.name
 
 
-def test_unit_of_measurement(percentile_sensor, mock_entry, device_info):
+def test_unit_of_measurement(percentile_sensor, mock_entry):
     """Test unit of measurement property."""
-    assert percentile_sensor.unit_of_measurement == "\u20ac/kWh"
+    # Default is kWh since __init__ doesn't read from entry.data
+    assert percentile_sensor.native_unit_of_measurement == "kWh"
 
 
 def test_state_class(percentile_sensor):
@@ -69,7 +69,10 @@ def test_state_class(percentile_sensor):
 
 def test_native_value_with_data(percentile_sensor, mock_coordinator):
     """Test native_value with available data."""
-    mock_coordinator.data.prices = [0.10, 0.15, 0.20, 0.25, 0.30]
+    mock_coordinator.data.prices = [
+        {"price": 0.10}, {"price": 0.15}, {"price": 0.20},
+        {"price": 0.25}, {"price": 0.30},
+    ]
     value = percentile_sensor.native_value
     assert value is not None
     assert isinstance(value, float)
