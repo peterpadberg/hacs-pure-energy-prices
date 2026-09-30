@@ -99,16 +99,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: PureEnergieConfigEntry) 
     hass.data[DOMAIN][entry.entry_id] = coordinators
 
     # Register the device in the device registry
+    # Register a single device per config entry (not per commodity)
     device_registry = async_get_device_registry(hass)
-    for coordinator in coordinators.values():
-        device_registry.async_get_or_create(
-            config_entry_id=entry.entry_id,
-            identifiers={(DOMAIN, entry.entry_id)},
-            name=f"Pure Energie {coordinator.commodity.title()}",
-            manufacturer="Pure Energie",
-            model=f"Dynamic Pricing ({coordinator.commodity} {coordinator.direction})",
-            entry_type=DeviceEntryType.SERVICE,
-        )
+    device_registry.async_get_or_create(
+        config_entry_id=entry.entry_id,
+        identifiers={(DOMAIN, entry.entry_id)},
+        name="Pure Energie",
+        manufacturer="Pure Energie",
+        entry_type=DeviceEntryType.SERVICE,
+    )
 
     entry.async_on_unload(
         entry.add_update_listener(
