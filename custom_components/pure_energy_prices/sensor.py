@@ -222,7 +222,7 @@ async def async_setup_entry(
                 config_entry,
                 "gas",
                 "import",
-                "m³",
+                UNIT_EUR_M3,
             )
         )
         # Add percentile sensors for gas import
@@ -233,7 +233,7 @@ async def async_setup_entry(
                     config_entry,
                     "gas",
                     "import",
-                    "m³",
+                    UNIT_EUR_M3,
                     percentile,
                 )
             )
