@@ -54,7 +54,9 @@ class PureEnergieConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         existing_data: dict[str, Any] = dict(existing_entry.data) if existing_entry else {}
 
         if user_input is not None:
-            return self.async_update_entry(data=user_input)
+            # ConfigFlow doesn't have async_update_entry; use the hass API directly
+            self.hass.config_entries.async_update_entry(existing_entry, data=user_input)
+            return self.async_abort(reason="updated")
 
         schema = vol.Schema(
             {
