@@ -44,11 +44,17 @@ class PureEnergieConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle re-configuration of an existing entry."""
         errors: dict[str, str] = {}
 
+        # Get existing config entry from the reconfigure context
+        entry_id = self.context.get("entry_id")
+        existing_entry = (
+            self.hass.config_entries.async_get_entry(entry_id)
+            if entry_id
+            else None
+        )
+        existing_data: dict[str, Any] = dict(existing_entry.data) if existing_entry else {}
+
         if user_input is not None:
             return self.async_update_entry(data=user_input)
-
-        # Pre-fill with existing config entry values so the user sees current config
-        existing_data: dict[str, Any] = dict(self.config_entry.data)
 
         schema = vol.Schema(
             {
