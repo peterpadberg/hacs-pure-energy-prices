@@ -29,7 +29,6 @@ class PureEnergiePriceSensor(SensorEntity):
     """Sensor entity for displaying pure energy prices."""
 
     _attr_has_entity_name = True
-    _attr_name = "Current Price"
 
     def __init__(
         self,
@@ -42,7 +41,7 @@ class PureEnergiePriceSensor(SensorEntity):
         """Initialize the sensor."""
         self._attr_device_info = {
             "identifiers": {(DOMAIN, config_entry.entry_id)},
-            "name": f"Pure Energie {commodity.title()}",
+            "name": "Pure Energie",
             "manufacturer": "Pure Energie",
             "model": f"Dynamic Pricing ({commodity} {direction})",
         }
@@ -50,6 +49,7 @@ class PureEnergiePriceSensor(SensorEntity):
         self.config_entry = config_entry
         self._commodity = commodity
         self._direction = direction
+        self._attr_name = f"{commodity.title()} {direction.title()}"
         self._attr_unique_id = (
             f"{config_entry.entry_id}_{commodity}_{direction}"
         )
@@ -95,7 +95,7 @@ class PureEnergiePercentileSensor(SensorEntity):
         """Initialize the sensor."""
         self._attr_device_info = {
             "identifiers": {(DOMAIN, config_entry.entry_id)},
-            "name": f"Pure Energie {commodity.title()}",
+            "name": "Pure Energie",
             "manufacturer": "Pure Energie",
             "model": f"Dynamic Pricing ({commodity} {direction})",
         }
@@ -104,7 +104,7 @@ class PureEnergiePercentileSensor(SensorEntity):
         self._commodity = commodity
         self._direction = direction
         self._percentile = percentile
-        self._attr_name = "Percentile Price (" + str(int(self._percentile * 100)) + ")"
+        self._attr_name = f"{commodity.title()} Percentile Price ({int(percentile * 100)}%)"
         self._attr_unique_id = (
             f"{config_entry.entry_id}_{commodity}_{direction}_percentile_{int(percentile * 100)}"
         )
