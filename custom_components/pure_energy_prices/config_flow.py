@@ -45,46 +45,56 @@ class PureEnergieConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            return self.async_create_entry(
-                title="Pure Energie",
-                data=user_input,
-            )
+            return self.async_update_entry(data=user_input)
 
-        defaults: dict[str, Any] = {}
+        # Pre-fill with existing config entry values so the user sees current config
+        existing_data: dict[str, Any] = dict(self.config_entry.data)
 
         schema = vol.Schema(
             {
                 vol.Required(
                     CONF_COMMODITY_ELECTRICITY,
-                    default=defaults.get(CONF_COMMODITY_ELECTRICITY, True),
+                    default=existing_data.get(CONF_COMMODITY_ELECTRICITY, True),
                 ): cv.boolean,
                 vol.Required(
                     CONF_SOLAR_PANELS,
-                    default=defaults.get(CONF_SOLAR_PANELS, DEFAULT_SOLAR_PANELS),
+                    default=existing_data.get(
+                        CONF_SOLAR_PANELS, DEFAULT_SOLAR_PANELS
+                    ),
                 ): cv.boolean,
                 vol.Required(
                     CONF_COMMODITY_GAS,
-                    default=defaults.get(CONF_COMMODITY_GAS, False),
+                    default=existing_data.get(CONF_COMMODITY_GAS, False),
                 ): cv.boolean,
                 vol.Required(
                     CONF_GAS_ELEMENT_ID,
-                    default=defaults.get(CONF_GAS_ELEMENT_ID, DEFAULT_GAS_ELEMENT_ID),
+                    default=existing_data.get(
+                        CONF_GAS_ELEMENT_ID, DEFAULT_GAS_ELEMENT_ID
+                    ),
                 ): vol.Coerce(int),
                 vol.Required(
                     CONF_ADDED_COSTS,
-                    default=defaults.get(CONF_ADDED_COSTS, DEFAULT_ADDED_COSTS),
+                    default=existing_data.get(
+                        CONF_ADDED_COSTS, DEFAULT_ADDED_COSTS
+                    ),
                 ): vol.Coerce(float),
                 vol.Required(
                     CONF_RETURN_COSTS,
-                    default=defaults.get(CONF_RETURN_COSTS, DEFAULT_RETURN_COSTS),
+                    default=existing_data.get(
+                        CONF_RETURN_COSTS, DEFAULT_RETURN_COSTS
+                    ),
                 ): vol.Coerce(float),
                 vol.Required(
                     CONF_SCAN_INTERVAL,
-                    default=defaults.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
+                    default=existing_data.get(
+                        CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+                    ),
                 ): vol.All(vol.Coerce(int), vol.Range(min=60, max=86400)),
                 vol.Required(
                     CONF_DOUBLE_METER,
-                    default=defaults.get(CONF_DOUBLE_METER, DEFAULT_DOUBLE_METER),
+                    default=existing_data.get(
+                        CONF_DOUBLE_METER, DEFAULT_DOUBLE_METER
+                    ),
                 ): cv.boolean,
             },
         )
