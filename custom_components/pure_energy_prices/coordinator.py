@@ -102,11 +102,10 @@ class PureEnergyCoordinator(DataUpdateCoordinator[PureEnergieData]):
                         record.get("price", 0.0) + added_costs
                     )
             elif self._direction == "export":
-                # Export: subtract return costs only
-                if return_costs > 0:
-                    record["price"] = (
-                        record.get("price", 0.0) - return_costs
-                    )
+                # Export: add return costs as a subsidy/incentive
+                record["price"] = (
+                    record.get("price", 0.0) + return_costs
+                )
 
         return prices
 
