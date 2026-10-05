@@ -23,6 +23,7 @@ from custom_components.pure_energy_prices.const import (
     CONF_RETURN_COSTS,
     CONF_SCAN_INTERVAL,
     CONF_SOLAR_PANELS,
+    COMMODITY_REDELIVERY,
     DEFAULT_ADDED_COSTS,
     DEFAULT_BASE_URL,
     DEFAULT_BUSINESS,
@@ -102,9 +103,10 @@ class PureEnergyCoordinator(DataUpdateCoordinator[PureEnergieData]):
                         record.get("price", 0.0) + added_costs
                     )
             elif self._direction == "export":
-                # Export: add return costs as a subsidy/incentive
+                # Export: the selling fee (verkoopvergoeding) is paid per
+                # exported kWh, so it lowers the compensation
                 record["price"] = (
-                    record.get("price", 0.0) + return_costs
+                    record.get("price", 0.0) - return_costs
                 )
 
         return prices
@@ -139,6 +141,10 @@ class PureEnergyCoordinator(DataUpdateCoordinator[PureEnergieData]):
             )
         else:
             element_id = element_id or entry.data.get("element_id", 11480)
+
+        # Export prices are a separate price list in the API
+        if self._direction == "export" and commodity == CONF_COMMODITY_ELECTRICITY:
+            commodity = COMMODITY_REDELIVERY
 
         current_param = self._build_current_param(current_dt)
 

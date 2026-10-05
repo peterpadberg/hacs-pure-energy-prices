@@ -57,7 +57,7 @@ After setup, access options via the integration options flow to update:
 Each config entry creates:
 
 - **Electricity Import**: Current import price sensor + percentile sensors
-- **Electricity Export**: Export price sensor + percentile sensors (when solar panels enabled)
+- **Electricity Export**: Export price sensor + percentile sensors (when solar panels enabled). Uses the API's `redelivery` price list (purchase price excl. energy tax and VAT), minus the return costs
 - **Percentile Sensors**: Multiple percentile price sensors per direction (5th, 10th, 20th, 40th by default)
 
 ### Gas Sensors
@@ -101,7 +101,7 @@ The integration fetches prices from the Pure Energie API using:
 
 - `double_meter`: true/false
 - `solar_panels`: true/false
-- `commodity`: electricity or gas
+- `commodity`: electricity, gas, or redelivery (export prices)
 - `current`: Current timestamp
 - `business`: true/false
 - `element_id`: Element identifier

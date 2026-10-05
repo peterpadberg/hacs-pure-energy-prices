@@ -45,3 +45,6 @@ SENSOR_TYPE_EXPORT = "export"
 # Commodity constants
 COMMODITY_ELECTRICITY = "electricity"
 COMMODITY_GAS = "gas"
+# API commodity for export (teruglevering) prices: the purchase price excl.
+# energy tax and VAT, instead of the all-inclusive import price
+COMMODITY_REDELIVERY = "redelivery"
