@@ -88,13 +88,7 @@ class PureEnergyCoordinator(DataUpdateCoordinator[PureEnergieData]):
         prices: list[dict],
         now_dt: datetime | None = None,
     ) -> list[dict]:
-        """Apply direction-based cost adjustments to prices.
-
-        Only applies cost adjustments to today's prices. Next-day prices
-        are left unchanged because the Pure Energie API doesn't provide
-        cost breakdown data (added_costs/return_costs) for the next day
-        yet - applying defaults would taint the percentile sensors.
-        """
+        """Apply direction-based cost adjustments to prices."""
         if now_dt is None:
             now_dt = datetime.now(tz=timezone.utc)
         today_date = now_dt.date()
@@ -122,19 +116,24 @@ class PureEnergyCoordinator(DataUpdateCoordinator[PureEnergieData]):
 
     def _get_record_date(self, record: dict) -> date | None:
         """Extract the date from a price record's date field."""
-        # Try date.full first (nested structure: record["date"]["full"])
         date_obj = record.get("date")
         if isinstance(date_obj, dict):
             date_str = date_obj.get("full")
         else:
             date_str = None
         if not date_str:
-            # Try top-level "full" field as fallback
             date_str = record.get("full")
         if not date_str:
             return None
         try:
-            return datetime.fromisoformat(date_str).date()
+            # Handle different datetime formats the API might return
+            if isinstance(date_str, str) and ' ' in date_str:
+                # Example: "2026-10-05 12:00"
+                dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M")
+            else:
+                # Example: "2026-10-05" or "2026-10-05T00:00"
+                dt = datetime.fromisoformat(date_str)
+            return dt.date()
         except (ValueError, TypeError):
             return None
 
@@ -151,14 +150,12 @@ class PureEnergyCoordinator(DataUpdateCoordinator[PureEnergieData]):
 
         commodity = self._commodity
         if commodity is None:
-            # Default: use the main element_id for the entry
             commodity = (
                 CONF_COMMODITY_ELECTRICITY
                 if entry.data.get(CONF_COMMODITY_ELECTRICITY, True)
                 else CONF_COMMODITY_GAS
             )
 
-        # Determine element_id based on commodity
         if commodity == CONF_COMMODITY_GAS:
             element_id = entry.data.get(
                 CONF_GAS_ELEMENT_ID, DEFAULT_GAS_ELEMENT_ID
@@ -204,7 +201,6 @@ class PureEnergyCoordinator(DataUpdateCoordinator[PureEnergieData]):
             if not text_content.strip():
                 raise UpdateFailed("Empty response")
 
-            # Find JSON start in case of HTML wrapper
             html_start = text_content.find("{")
             if html_start >= 0:
                 payload = json.loads(text_content[html_start:].strip())
@@ -218,8 +214,17 @@ class PureEnergyCoordinator(DataUpdateCoordinator[PureEnergieData]):
         if not isinstance(prices, list):
             _LOGGER.warning("Expected list of price objects but got %s", type(prices))
             return []
+        
+        if prices:
+            prices_list = [p.get("price", 0.0) for p in prices if "price" in p]
+            if prices_list:
+                min_price = min(prices_list)
+                max_price = max(prices_list)
+                _LOGGER.warning(
+                    "DEBUG: Raw Price Count=%d, Min Price=%.2f, Max Price=%.2f for %s/%s",
+                    len(prices_list), min_price, max_price, self._commodity or "default", self._direction
+                )
 
-        # Apply direction-based cost adjustments (pass now_dt for date-based skipping)
         return self._apply_cost_adjustments(prices, now_dt=current_dt)
 
     async def _async_update_data(self) -> PureEnergieData:
